@@ -4,7 +4,6 @@
   export let bgColor = undefined;
   export let textColor = undefined;
 
-  console.log($$restProps);
   let isLeftHovered;
 </script>
 

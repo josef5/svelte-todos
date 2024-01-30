@@ -1,15 +1,32 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import TodoList from "./lib/TodoList.svelte";
   import { v4 as uuid } from "uuid";
 
   let todoList;
+  let todos = null;
+  let error = null;
+  let isLoading = false;
 
-  let todos = [
-    { id: uuid(), title: "Todo 1", completed: true },
-    { id: uuid(), title: "Todo 2", completed: false },
-    { id: uuid(), title: "Todo 3", completed: true },
-  ];
+  onMount(() => {
+    loadTodos();
+  });
+
+  async function loadTodos() {
+    isLoading = true;
+
+    await fetch("https://jsonplaceholder.typicode.com/todos?_limit=10").then(
+      async (response) => {
+        if (response.ok) {
+          todos = await response.json();
+        } else {
+          error = "An error has occurred";
+        }
+      }
+    );
+
+    isLoading = false;
+  }
 
   $: console.log("todos", todos);
 
@@ -43,6 +60,8 @@
 
 <TodoList
   {todos}
+  {error}
+  {isLoading}
   bind:this={todoList}
   on:addTodo={handleAddTodo}
   on:removeTodo={handleRemoveTodo}

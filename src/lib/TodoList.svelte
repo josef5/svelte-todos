@@ -5,11 +5,18 @@
   import { afterUpdate, createEventDispatcher } from "svelte";
   import FaRegTrashAlt from "svelte-icons/fa/FaRegTrashAlt.svelte";
 
-  let input, listDiv, autoscroll, listDivScrollHeight;
-  let inputText = "";
+  export let todos = null;
+  export let error;
+  export let isLoading = false;
 
-  export let todos = [];
   let prevTodos = todos;
+  let inputText = "";
+  let input, listDiv, autoscroll, listDivScrollHeight;
+
+  $: {
+    autoscroll = todos && prevTodos && todos.length > prevTodos.length;
+    prevTodos = todos;
+  }
 
   afterUpdate(() => {
     if (autoscroll) {
@@ -18,11 +25,6 @@
       autoscroll = false;
     }
   });
-
-  $: {
-    autoscroll = todos.length > prevTodos.length;
-    prevTodos = todos;
-  }
 
   export function clearInput() {
     inputText = "";
