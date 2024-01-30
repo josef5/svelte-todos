@@ -32,7 +32,7 @@
 
   $: console.log("todos", todos);
 
-  function handleAddTodo(event) {
+  async function handleAddTodo(event) {
     event.preventDefault();
 
     isAdding = true;
@@ -134,7 +134,27 @@
   on:addTodo={handleAddTodo}
   on:removeTodo={handleRemoveTodo}
   on:toggleTodo={handleToggleTodo}
-/>
+  let:todo
+  let:handleToggleTodo
+  let:index
+>
+  <!-- Use slot -->
+  <!-- <div>{todo.title}</div> -->
+  <!-- {@const { id, completed, title } = todo} -->
+  <!-- <Todo {todo} on:remove on:toggle /> -->
+  <!-- <div>
+    <input
+      disabled={disabledItems.includes(id)}
+      on:input={(event) => {
+        event.currentTarget.checked = completed;
+        handleToggleTodo(id, !completed);
+      }}
+      type="checkbox"
+      checked={completed}
+    />
+    {title}
+  </div> -->
+</TodoList>
 
 <style>
   @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");

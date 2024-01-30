@@ -72,33 +72,36 @@
           <p class="state-text">No todos</p>
         {:else}
           <ul>
-            {#each todos as { id, title, completed } (id)}
+            {#each todos as todo, index (todo.id)}
+              {@const { id, completed, title } = todo}
               <!-- {(console.log("todo", id, title, completed), "")} -->
               <!-- {@debug id, title, completed} -->
-              <li class:completed>
-                <label for="todo">
-                  <input
-                    on:input={(event) => {
-                      // Ensure that the checkbox is always in sync with the 'completed' value from the state.
-                      event.currentTarget.checked = completed;
-
-                      // We use the inverse of 'completed' when we call the 'handleToggleTodo' function. 'completed' is the existing value from the state before the user has interacted with the checkbox.
-                      handleToggleTodo(id, !completed);
-                    }}
-                    type="checkbox"
-                    checked={completed}
-                  />
-                  {title}
-                </label>
-                <button
-                  class="remove-todo-button"
-                  aria-label="Remove todo: {title}"
-                  on:click={() => handleRemoveTodo(id)}
-                  ><span style:width="10px" style:display="inline-block"
-                    ><FaRegTrashAlt /></span
-                  ></button
-                >
-              </li>
+              <slot {todo} {index} {handleToggleTodo}>
+                <li class:completed>
+                  <label for="todo">
+                    <input
+                      on:input={(event) => {
+                        // Ensure that the checkbox is always in sync with the 'completed' value from the state.
+                        event.currentTarget.checked = completed;
+                        // We use the inverse of 'completed' when we call the 'handleToggleTodo' function. 'completed' is the existing value from the state before the user has interacted with the checkbox.
+                        handleToggleTodo(id, !completed);
+                      }}
+                      type="checkbox"
+                      checked={completed}
+                    />
+                    <slot name="title">{title}</slot>
+                  </label>
+                  <button
+                    disabled={disabledItems.includes(id)}
+                    class="remove-todo-button"
+                    aria-label="Remove todo: {title}"
+                    on:click={() => handleRemoveTodo(id)}
+                    ><span style:width="10px" style:display="inline-block"
+                      ><FaRegTrashAlt /></span
+                    ></button
+                  >
+                </li>
+              </slot>
             {/each}
           </ul>
         {/if}
