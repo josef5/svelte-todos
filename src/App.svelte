@@ -7,6 +7,8 @@
   let todos = null;
   let error = null;
   let isLoading = false;
+  let isAdding = false;
+  let disabledItems = [];
 
   onMount(() => {
     loadTodos();
@@ -126,6 +128,8 @@
   {todos}
   {error}
   {isLoading}
+  {disabledItems}
+  disableAdding={isAdding}
   bind:this={todoList}
   on:addTodo={handleAddTodo}
   on:removeTodo={handleRemoveTodo}

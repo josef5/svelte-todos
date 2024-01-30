@@ -8,6 +8,8 @@
   export let todos = null;
   export let error;
   export let isLoading = false;
+  export let disableAdding = false;
+  export let disabledItems = [];
 
   let prevTodos = todos;
   let inputText = "";
@@ -103,10 +105,18 @@
       </div>
     </div>
   {/if}
+
   <form class="add-todo-form" on:submit|preventDefault={handleAddTodo}>
-    <input bind:this={input} bind:value={inputText} placeholder="New Todo" />
-    <Button aria-label="Add Todo" disabled={!inputText} type="submit"
-      >Add</Button
+    <input
+      bind:this={input}
+      bind:value={inputText}
+      placeholder="New Todo"
+      disabled={disableAdding || isLoading}
+    />
+    <Button
+      aria-label="Add Todo"
+      disabled={!inputText || disableAdding || isLoading}
+      type="submit">Add</Button
     >
   </form>
 </div>
@@ -166,6 +176,11 @@
             right: 10px;
             cursor: pointer;
             // display: none;
+
+            &:disabled {
+              opacity: 0.4;
+              cursor: not-allowed;
+            }
 
             :global(svg) {
               fill: #666;
