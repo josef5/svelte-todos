@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onMount, tick } from "svelte";
   import TodoList from "./lib/TodoList.svelte";
   import { v4 as uuid } from "uuid";
 
@@ -33,28 +33,92 @@
   function handleAddTodo(event) {
     event.preventDefault();
 
-    todos = [
-      ...todos,
-      {
-        id: uuid(),
+    isAdding = true;
+
+    const response = await fetch("https://jsonplaceholder.typicode.com/todos", {
+      method: "POST",
+      body: JSON.stringify({
         title: event.detail.title,
         completed: false,
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
       },
-    ];
+    });
 
-    todoList.clearInput();
+    if (response.ok) {
+      const todo = await response.json();
+      todos = [...todos, { ...todo, id: uuid() }];
+
+      todoList.clearInput();
+    } else {
+      alert("An error has occurred.");
+    }
+
+    isAdding = false;
+
+    await tick();
+
+    todoList.focusInput();
   }
 
-  function handleRemoveTodo(event) {
-    todos = todos.filter((todo) => todo.id !== event.detail.id);
-  }
+  async function handleRemoveTodo(event) {
+    const id = event.detail.id;
 
-  function handleToggleTodo(event) {
-    todos = todos.map((todo) =>
-      todo.id === event.detail.id
-        ? { ...todo, completed: event.detail.value }
-        : todo
+    if (disabledItems.includes(id)) return;
+
+    // Disable the item while it's being removed to avoid race conditions
+    disabledItems = [...disabledItems, id];
+
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/todos/${id}`,
+      {
+        method: "DELETE",
+      }
     );
+
+    if (response.ok) {
+      todos = todos.filter((todo) => todo.id !== event.detail.id);
+    } else {
+      alert("An error has occurred.");
+    }
+
+    disabledItems = disabledItems.filter((itemId) => itemId !== id);
+  }
+
+  async function handleToggleTodo(event) {
+    const id = event.detail.id;
+
+    if (disabledItems.includes(id)) return;
+
+    // Disable the item while it's being removed to avoid race conditions
+    disabledItems = [...disabledItems, id];
+
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/todos/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          completed: event.detail.value,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      }
+    );
+
+    // Optimistic update
+    if (response.ok) {
+      todos = todos.map((todo) =>
+        todo.id === event.detail.id
+          ? { ...todo, completed: event.detail.value }
+          : todo
+      );
+    } else {
+      alert("An error has occurred.");
+    }
+
+    disabledItems = disabledItems.filter((itemId) => itemId !== id);
   }
 </script>
 
